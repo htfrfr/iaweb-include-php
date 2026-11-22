@@ -98,3 +98,7 @@ maquina virtual.
 sin haber hecho `docker compose down` en la otra, falla por nombre repetido. es
 lo mismo que me paso con nginx y apache peleandose por el puerto 80 en la
 practica de mariadb.
+
+## repositorio
+
+https://github.com/htfrfr/mi-include-php
