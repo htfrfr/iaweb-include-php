@@ -61,3 +61,7 @@ me salio un 403 al levantarlo
 el umask de la maquina deja los ficheros en 660 y nginx dentro del contenedor no corre con mi usuario asi que no podia leerlos y se arregla con chmod -R o+rX
 
 las dos practicas usan el mismo nombre de contenedor y el mismo 8080 asi que hay que bajar una para levantar la otra
+
+# repositorio
+
+https://github.com/htfrfr/iaweb-include-php
