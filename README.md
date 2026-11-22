@@ -1,104 +1,47 @@
-# Laboratorio de include
+## Laboratorio de include
+Adrián Donoso  Implementación de Aplicaciones Web
 
-Adrian Donoso - Implementacion de Aplicaciones Web
-
-Practica para ver como funcionan los includes de php, montada sobre el entorno
-de docker con nginx y php-fpm que hicimos en la practica anterior.
-
-## que hay aqui
+# estructura
 
     mi-include-php/
-    ├── .vscode/launch.json     configuracion del debug con xdebug
+    ├── .vscode/launch.json
     ├── app/
-    │   ├── index.php           la pagina principal
-    │   ├── encabezado.php      la cabecera con el <head>
-    │   └── pie.html            el pie
+    │   ├── index.php
+    │   ├── encabezado.php
+    │   └── pie.html
     ├── docker-compose.yml
     └── README.md
 
-## como se levanta
+# como se levanta
 
     docker compose up -d
 
-y se entra en http://localhost:8080. para pararlo `docker compose down`.
+y se entra en http://localhost:8080, para pararlo docker compose down
 
-## como funciona el codigo
+# como funciona
 
-el navegador solo pide index.php, los otros dos ficheros no se piden nunca por
-url, los mete php por dentro antes de mandar la respuesta.
+el navegador solo pide index.php, los otros dos no se piden nunca por url los mete php por dentro
 
-index.php hace tres cosas en este orden
+index.php define $titulo, luego incluye encabezado.php que trae el doctype el head y el body abierto, y despues saca el h1 e incluye pie.html
 
-1. define la variable `$titulo`
-2. `include("encabezado.php")` que trae el doctype el head y el `<body>` abierto
-3. imprime el `<h1>` con el titulo y despues `include("pie.html")` con el `<h3>`
-   del pie, y cierra `</body></html>`
+o sea que el html que llega al navegador no esta entero en ningun fichero, se arma en el momento con los tres trozos
 
-o sea que el html completo que llega al navegador no existe en ningun fichero,
-se arma en el momento juntando los tres trozos. lo he comprobado con curl y
-sale todo seguido
+# lo que mas me ha gustado
 
-    <!DOCTYPE html>
-    <html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <title>Página con includes</title>
-    </head>
-    <body>
-    <h1>Página con includes</h1>
-    <h3>Pie de Página</h3>
-    </body>
-    </html>
+que la variable viaja al include, en encabezado.php se usa $titulo y ahi no esta definida, esta en index.php, funciona porque php no ejecuta el include aparte sino que lo pega en el sitio de la linea y sigue con las mismas variables, por eso el titulo de la pestaña sale bien
 
-## lo que me ha parecido mas interesante
+si pones el include antes de definir $titulo el title sale vacio asi que el orden de las lineas importa
 
-**la variable viaja al include.** en encabezado.php se usa `<?= $titulo ?>` y esa
-variable no esta definida ahi, esta definida en index.php. funciona porque el
-include no es un fichero aparte que se ejecuta solo, php lo pega en el sitio
-donde esta la linea del include y sigue con las mismas variables que ya tenia.
-por eso en la pestaña del navegador pone "Página con includes".
+y el pie es un .html y lo incluye igual, include no mira la extension
 
-si pones el include ANTES de definir `$titulo` el `<title>` sale vacio, el orden
-de las lineas importa.
+# cosas que me pasaron
 
-**pie.html es html y aun asi lo incluye.** include no mira la extension, se traga
-lo que sea. la diferencia es que un .php que se incluye puede llevar codigo y se
-ejecuta, y el .html entra tal cual. ademas como pie.html no se pide por url no
-importa que sea un trozo suelto sin doctype ni nada.
+el enunciado pone cabecera.php en el arbol pero el codigo hace include encabezado.php, deje encabezado.php que es lo que pide el include
 
-**para que sirve esto.** la cabecera y el pie se escriben una vez y valen para
-todas las paginas, si cambias el menu lo cambias en un sitio y no en veinte.
-
-## cosas que me han pasado montandolo
-
-**el enunciado se contradice con los nombres.** en el arbol de carpetas pone
-`cabecera.php` pero el codigo de index.php hace `include("encabezado.php")` y
-mas abajo te manda crear `app/encabezado.php`. he dejado `encabezado.php` que es
-lo que pide el include, con el otro nombre da un error de que no encuentra el
-fichero y la pagina sale a medias.
-
-**error 403 forbidden la primera vez.** levante el contenedor y en vez de la
-pagina salia un 403 de nginx. en el log del contenedor estaba el motivo
+me salio un 403 forbidden al levantarlo, en docker logs php-practicas estaba el motivo
 
     "/app/index.php" is forbidden (13: Permission denied)
 
-el umask de esta maquina es 0007 asi que los ficheros se crean con permisos 660
-y las carpetas 770, o sea sin permiso para "otros". el problema es que dentro
-del contenedor nginx corre con el usuario `nginx` y no con `application`, que es
-el que coincide con mi uid 1000, asi que nginx no podia leer el index.php. se
-arregla dando lectura a otros
+el umask de la maquina es 0007 asi que los ficheros nacen con 660 y dentro del contenedor nginx corre como usuario nginx y no como application, se arregla con chmod -R o+rX
 
-    chmod -R o+rX .
-
-y ya devuelve 200. no es cosa de docker ni de la imagen, es el umask de la
-maquina virtual.
-
-**solo puede haber un contenedor a la vez.** las tres practicas usan el mismo
-`container_name: php-practicas` y el mismo puerto 8080, asi que si levantas esta
-sin haber hecho `docker compose down` en la otra, falla por nombre repetido. es
-lo mismo que me paso con nginx y apache peleandose por el puerto 80 en la
-practica de mariadb.
-
-## repositorio
-
-https://github.com/htfrfr/mi-include-php
+las tres practicas usan el mismo container_name y el mismo 8080 asi que hay que bajar una para levantar otra, lo mismo que me paso con nginx y apache peleandose por el 80

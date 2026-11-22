@@ -1,5 +1,5 @@
 <?php
-$titulo = "Página con includes";
+$titulo = "el include funciona julian";
 include("encabezado.php");
 ?>
 <h1><?= $titulo ?></h1>
