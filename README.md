@@ -36,6 +36,22 @@ si pones el include antes de definir $titulo el title sale vacio asi que el orde
 
 y el pie es un .html y lo incluye igual porque include no mira la extension
 
+# seguridad
+
+aqui el include lleva el nombre escrito a mano asi que no hay por donde meterle mano pero si en vez de eso lo cogiera de la url
+
+    include($_GET['pagina']);
+
+entonces el que pide la pagina elige que fichero abre php y eso es un lfi
+
+con algo asi en la barra
+
+    ?pagina=../../../../etc/passwd
+
+php se lee el fichero y lo escupe en la pagina y si el servidor tiene permitido abrir urls de fuera ya no es leer es traerse un fichero php de otro sitio y ejecutarlo
+
+por eso el include nunca se monta con lo que venga de fuera y si hace falta elegir pagina se hace con una lista cerrada de las que valen
+
 # cosas que me pasaron
 
 el enunciado pone cabecera.php en el arbol pero el codigo hace include encabezado.php asi que deje encabezado.php que es lo que pide el include
