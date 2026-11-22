@@ -14,15 +14,15 @@ Adrián Donoso  Implementación de Aplicaciones Web
 
 # como se levanta
 
-    docker compose up -d
+docker compose up -d
 
 y se entra en http://localhost:8080 y para pararlo docker compose down
 
 # como funciona
 
-el navegador solo pide index.php y los otros dos no se piden nunca por url los mete php por dentro
+el navegador solo pide index.php y los otros dos los mete php por dentro
 
-index.php define $titulo y luego incluye encabezado.php que trae el doctype y el head y el body abierto y despues saca el h1 e incluye pie.html
+index.php define $titulo y mete encabezado.php con el doctype y el head y el body abierto y luego saca el h1 y mete pie.html
 
 o sea que el html que llega al navegador no esta entero en ningun fichero se arma en el momento con los tres trozos
 
@@ -30,36 +30,32 @@ o sea que el html que llega al navegador no esta entero en ningun fichero se arm
 
 que la variable viaja al include
 
-en encabezado.php se usa $titulo y ahi no esta definida sino en index.php y funciona porque php no ejecuta el include aparte sino que lo pega en el sitio de la linea y sigue con las mismas variables por eso el titulo de la pestaña sale bien
+en encabezado.php se usa $titulo y ahi no esta definida sino en index.php y funciona porque php lo pega en el sitio de la linea y sigue con las mismas variables por eso sale bien el titulo de la pestaña
 
-si pones el include antes de definir $titulo el title sale vacio asi que el orden de las lineas importa
-
-y el pie es un .html y lo incluye igual porque include no mira la extension
+si el include va antes de definir $titulo el title sale vacio
 
 # seguridad
 
-aqui el include lleva el nombre escrito a mano asi que no hay por donde meterle mano pero si en vez de eso lo cogiera de la url
+aqui el nombre del fichero va escrito a mano pero si lo cogiera de la url
 
-    include($_GET['pagina']);
+include($_GET['pagina']);
 
-entonces el que pide la pagina elige que fichero abre php y eso es un lfi
+el que pide la pagina elige que fichero abre php y eso es un lfi
 
-con algo asi en la barra
+?pagina=../../../../etc/passwd
 
-    ?pagina=../../../../etc/passwd
+php se lo lee y lo escupe en la pagina y si el servidor deja abrir urls de fuera ya no es leer es traerse un php de otro sitio y ejecutarlo
 
-php se lee el fichero y lo escupe en la pagina y si el servidor tiene permitido abrir urls de fuera ya no es leer es traerse un fichero php de otro sitio y ejecutarlo
-
-por eso el include nunca se monta con lo que venga de fuera y si hace falta elegir pagina se hace con una lista cerrada de las que valen
+por eso el include no se monta nunca con lo que venga de fuera
 
 # cosas que me pasaron
 
-el enunciado pone cabecera.php en el arbol pero el codigo hace include encabezado.php asi que deje encabezado.php que es lo que pide el include
+el enunciado pone cabecera.php en el arbol pero el codigo hace include encabezado.php asi que deje el del include
 
-me salio un 403 forbidden al levantarlo y en docker logs php-practicas estaba el motivo
+me salio un 403 al levantarlo
 
-    "/app/index.php" is forbidden (13: Permission denied)
+"/app/index.php" is forbidden (13: Permission denied)
 
-el umask de la maquina es 0007 asi que los ficheros nacen con 660 y dentro del contenedor nginx corre como usuario nginx y no como application y se arregla con chmod -R o+rX
+el umask de la maquina deja los ficheros en 660 y nginx dentro del contenedor no corre con mi usuario asi que no podia leerlos y se arregla con chmod -R o+rX
 
-las dos practicas usan el mismo container_name y el mismo 8080 asi que hay que bajar una para levantar la otra igual que me paso con nginx y apache peleandose por el 80
+las dos practicas usan el mismo nombre de contenedor y el mismo 8080 asi que hay que bajar una para levantar la otra
