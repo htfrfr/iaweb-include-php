@@ -42,7 +42,9 @@ include($_GET['pagina']);
 
 el que pide la pagina elige que fichero abre php y eso es un lfi
 
-?pagina=../../../../etc/passwd
+http://localhost:8080/index.php?pagina=../../../../etc/passwd
+
+lo que va detras del ? son los parametros de la url y de ahi los saca $_GET asi que el valor de pagina lo pongo yo desde la barra
 
 php se lo lee y lo escupe en la pagina y si el servidor deja abrir urls de fuera ya no es leer es traerse un php de otro sitio y ejecutarlo
 
